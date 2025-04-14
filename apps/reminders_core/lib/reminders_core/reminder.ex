@@ -1,15 +1,17 @@
 defmodule RemindersCore.Reminder do
+	
   @moduledoc """
   It can be either standalone, or contain a list of `RemindersCore.Confirmation` that will trigger additional reminders after this one is completed.
   An example reminder is "Did you eat?" that triggers daily at 12:00 with randomised 15-minute interval. One of confirmations is "Yes" that triggers another reminder "Did you eat pills?"
   """
-  @enforce_keys [:text, :firing_time, :firing_period, :firing_window]
+  @enforce_keys [:id, :text, :firing_time, :firing_period, :firing_window]
   defstruct [
     :id,
     :text,
     :firing_time,
     :firing_period,
     :firing_window,
+    user_id: 0,
     nagging_interval: 600
   ]
 
@@ -24,6 +26,7 @@ defmodule RemindersCore.Reminder do
   """
   @type t :: %__MODULE__{
           id: any(),
+          user_id: any(),
           text: String.t(),
           firing_time: Time.t(),
           firing_period: :daily,
