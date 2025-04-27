@@ -1,15 +1,16 @@
-defmodule RemindersCore.Reminder.Store do
-  alias RemindersCore.Reminder
+defmodule RemindersCore.Data.Reminder.Store do
+  alias RemindersCore.Data.Reminder
   use GenServer
-
+  
+  @type reminder_id :: any()
+  
   @impl true
   def init(_opts) do
     {:ok, Map.new()}
   end
 
   @impl true
-  def handle_call({:upsert, %Reminder{} = reminder}, _from, state) do
-    id = get_id(reminder)
+  def handle_call({:upsert, %Reminder{id: id} = reminder}, _from, state) do
     action = if(Map.has_key?(state, id), do: :updated, else: :created)
     {:reply, {:ok, action, id}, Map.put(state, id, reminder)}
   end
@@ -33,27 +34,22 @@ defmodule RemindersCore.Reminder.Store do
   end
 
   # Client API
-
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @spec upsert(RemindersCore.Reminder.t()) :: {:ok, :updated | :created, any()}
+  @spec upsert(Reminder.t()) :: {:ok, :updated | :created, reminder_id()}
   def upsert(%Reminder{} = reminder) do
     GenServer.call(__MODULE__, {:upsert, reminder})
   end
 
-  @spec get(any()) :: {:ok, Reminder.t()} | {:error, any()}
+  @spec get(reminder_id()) :: {:ok, Reminder.t()} | {:error, any()}
   def get(id) do
     GenServer.call(__MODULE__, {:get, id})
   end
 
-  @spec delete(any()) :: {:ok} | {:error, :not_found}
+  @spec delete(reminder_id()) :: {:ok} | {:error, :not_found}
   def delete(id) do
     GenServer.call(__MODULE__, {:delete, id})
-  end
-
-  defp get_id(%Reminder{id: id, user_id: user_id}) do
-    {id, user_id}
   end
 end

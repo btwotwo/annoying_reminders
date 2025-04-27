@@ -1,4 +1,4 @@
-defmodule RemindersCore.Reminder do
+defmodule RemindersCore.Data.Reminder do
   @moduledoc """
   It can be either standalone, or contain a list of `RemindersCore.Confirmation` that will trigger additional reminders after this one is completed.
   An example reminder is "Did you eat?" that triggers daily at 12:00 with randomised 15-minute interval. One of confirmations is "Yes" that triggers another reminder "Did you eat pills?"
