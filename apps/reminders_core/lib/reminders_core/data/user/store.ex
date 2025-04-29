@@ -33,7 +33,7 @@ defmodule RemindersCore.Data.User.Store do
 
   @impl true
   def handle_call({:get_all}, _from, state) do
-    vals = Map.to_list(state) |> Enum.map(fn ({key, value}) -> value end)
+    vals = Map.to_list(state) |> Enum.map(fn {key, value} -> value end)
     {:reply, {:ok, vals}, state}
   end
 

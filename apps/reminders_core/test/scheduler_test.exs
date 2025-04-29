@@ -17,7 +17,7 @@ defmodule SchedulerTest do
       firing_time: Time.new(12, 0, 0),
       firing_period: :daily,
       firing_window: 5000,
-      nagging_interval: 500,
+      nagging_interval: 500
     })
   end
 end
