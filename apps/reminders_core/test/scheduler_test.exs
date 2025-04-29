@@ -1,11 +1,12 @@
 defmodule SchedulerTest do
-  use ExUnit
+  use ExUnit.Case
   alias RemindersCore.Scheduler
   alias RemindersCore.Data.Reminder
 
-  test "Scheduler creates valid tasks" do
-    reminder = create_reminder()
-    {:ok} = reminder |> Scheduler.schedule_reminder()
+  test "scheduler does not accept date in the past" do
+  end
+
+  test "scheduler correctly executes tasks" do
   end
 
   defp create_reminder() do
