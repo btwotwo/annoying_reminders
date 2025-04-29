@@ -31,6 +31,12 @@ defmodule RemindersCore.Data.User.Store do
     end
   end
 
+  @impl true
+  def handle_call({:get_all}, _from, state) do
+    vals = Map.to_list(state) |> Enum.map(fn ({key, value}) -> value end)
+    {:reply, {:ok, vals}, state}
+  end
+
   # Client API
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -46,5 +52,9 @@ defmodule RemindersCore.Data.User.Store do
 
   def delete(id) do
     GenServer.call(__MODULE__, {:delete, id})
+  end
+
+  def get_all() do
+    GenServer.call(__MODULE__, {:get_all})
   end
 end

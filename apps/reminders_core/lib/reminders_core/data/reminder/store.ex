@@ -1,9 +1,9 @@
 defmodule RemindersCore.Data.Reminder.Store do
   alias RemindersCore.Data.Reminder
   use GenServer
-  
+
   @type reminder_id :: any()
-  
+
   @impl true
   def init(_opts) do
     {:ok, Map.new()}
@@ -33,6 +33,12 @@ defmodule RemindersCore.Data.Reminder.Store do
     {:reply, {:ok}, Map.delete(state, id)}
   end
 
+  @impl true
+  def handle_call({:get_all}, _, state) do
+    vals = Map.to_list(state) |> Enum.map(fn {_, value} -> value end)
+    {:reply, {:ok, vals}, state}
+  end
+
   # Client API
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
@@ -51,5 +57,9 @@ defmodule RemindersCore.Data.Reminder.Store do
   @spec delete(reminder_id()) :: {:ok} | {:error, :not_found}
   def delete(id) do
     GenServer.call(__MODULE__, {:delete, id})
+  end
+
+  def get_all() do
+    GenServer.call(__MODULE__, {:get_all})
   end
 end
