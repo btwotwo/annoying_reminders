@@ -1,65 +1,58 @@
 defmodule RemindersCore.Data.Reminder.Store do
+  alias Ecto.Changeset
+  alias RemindersCore.Data.Reminder.ReminderState
+  alias RemindersCore.Data.Repo
   alias RemindersCore.Data.Reminder
-  use GenServer
+  @type reminder_id :: pos_integer()
 
-  @type reminder_id :: any()
+  @spec insert!(Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
+  def insert!(%Reminder{} = reminder) do
+    Repo.transaction(fn ->
+      reminder_record = Repo.insert!(reminder)
 
-  @impl true
-  def init(_opts) do
-    {:ok, Map.new()}
+      %ReminderState{
+        state: :pending,
+        reminder_id: reminder_record.id
+      }
+      |> Repo.insert!()
+
+      reminder_record
+    end)
   end
 
-  @impl true
-  def handle_call({:upsert, %Reminder{id: id} = reminder}, _from, state) do
-    action = if(Map.has_key?(state, id), do: :updated, else: :created)
-    {:reply, {:ok, action, id}, Map.put(state, id, reminder)}
+  @spec update!(RemindersCore.Data.Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
+  def update!(%Reminder{} = reminder) do
+    reminder |> Reminder.changeset() |> Repo.update!()
   end
 
-  @impl true
-  def handle_call({:get, id}, _from, state) do
-    case Map.get(state, id) do
-      nil -> {:reply, {:error, :not_found}, state}
-      val -> {:reply, {:ok, val}, state}
-    end
+  @spec get!(reminder_id()) :: Reminder.t()
+  def get!(id) do
+    Repo.get!(Reminder, id)
   end
 
-  @impl true
-  def handle_call({:delete, id}, _from, state) do
-    case Map.pop(state, id) do
-      {nil, _} -> {:reply, {:error, :not_found}, state}
-      {_val, deleted} -> {:reply, {:ok, id}, deleted}
-    end
-
-    {:reply, {:ok}, Map.delete(state, id)}
+  def delete!(id) do
+    reminder = Repo.get!(Reminder, id)
+    Repo.delete!(reminder)
   end
 
-  @impl true
-  def handle_call({:get_all}, _, state) do
-    vals = Map.to_list(state) |> Enum.map(fn {_, value} -> value end)
-    {:reply, {:ok, vals}, state}
-  end
-
-  # Client API
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
-  end
-
-  @spec upsert(Reminder.t()) :: {:ok, :updated | :created, reminder_id()}
-  def upsert(%Reminder{} = reminder) do
-    GenServer.call(__MODULE__, {:upsert, reminder})
-  end
-
-  @spec get(reminder_id()) :: {:ok, Reminder.t()} | {:error, any()}
-  def get(id) do
-    GenServer.call(__MODULE__, {:get, id})
-  end
-
-  @spec delete(reminder_id()) :: {:ok} | {:error, :not_found}
-  def delete(id) do
-    GenServer.call(__MODULE__, {:delete, id})
-  end
-
+  @spec get_all() :: [Reminder.t()]
   def get_all() do
-    GenServer.call(__MODULE__, {:get_all})
+    Repo.all(Reminder)
+  end
+
+  def get_state!(reminder_id) do
+    Repo.get!(ReminderState, reminder_id)
+  end
+
+  def set_scheduled(reminder_id) do
+    set_state(reminder_id, :scheduled)
+  end
+
+  def set_nagging(reminder_id) do
+    set_state(reminder_id, :nagging)
+  end
+
+  defp set_state(reminder_id, new_state) do
+    get_state!(reminder_id) |> Changeset.change(%{state: new_state}) |> Repo.update!()
   end
 end
