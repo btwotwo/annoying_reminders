@@ -39,7 +39,7 @@ defmodule RemindersCore.Data.Reminder.Store do
   def get_all() do
     Repo.all(Reminder)
   end
-
+  
   def get_state!(reminder_id) do
     Repo.get!(ReminderState, reminder_id)
   end

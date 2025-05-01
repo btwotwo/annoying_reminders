@@ -24,3 +24,4 @@ config :reminders_core, ecto_repos: [RemindersCore.Data.Repo]
 #       format: "$date $time [$level] $metadata$message\n",
 #       metadata: [:user_id]
 #
+import_config "#{config_env()}.exs"
