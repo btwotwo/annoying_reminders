@@ -10,7 +10,7 @@ defmodule RemindersCore.Application do
     children = [
       # Starts a worker by calling: RemindersCore.Worker.start_link(arg)
       # {RemindersCore.Worker, arg}
-      RemindersCore.Data.Reminder.Repo
+      RemindersCore.Data.Repo
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

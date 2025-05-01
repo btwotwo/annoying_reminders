@@ -9,13 +9,13 @@
 # move said applications out of the umbrella.
 import Config
 
-config :reminders_core, RemindersCore.Data.Reminder.Repo,
+config :reminders_core, RemindersCore.Data.Repo,
   database: "reminders_core",
   username: "postgres",
   password: "1234",
   hostname: "localhost"
 
-config :reminders_core, ecto_repos: [RemindersCore.Data.Reminder.Repo]
+config :reminders_core, ecto_repos: [RemindersCore.Data.Repo]
 
 # Sample configuration:
 #
