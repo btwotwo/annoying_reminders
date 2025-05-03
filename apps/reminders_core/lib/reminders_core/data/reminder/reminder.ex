@@ -11,6 +11,7 @@ defmodule RemindersCore.Data.Reminder do
     field(:firing_window, :integer)
     field(:nagging_interval, :integer, default: 10000)
     field(:ack_delay, :integer)
+    timestamps()
     has_one(:state, RemindersCore.Data.Reminder.ReminderState)
   end
 
