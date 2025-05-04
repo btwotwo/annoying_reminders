@@ -3,7 +3,7 @@ defmodule RemindersCore.Factory do
   alias RemindersCore.Data.Reminder
   alias RemindersCore.Data.Repo
 
-  def reminder_generator() do
+  def reminder_generator(user_id) do
     ExUnitProperties.gen all(
                            text <- StreamData.string(:printable),
                            firing_time <- time_generator(),
@@ -26,7 +26,8 @@ defmodule RemindersCore.Factory do
         firing_period: firing_period,
         firing_window: firing_window,
         nagging_interval: nagging_interval,
-        ack_delay: ack_delay
+        ack_delay: ack_delay,
+        user_id: user_id
       }
     end
   end

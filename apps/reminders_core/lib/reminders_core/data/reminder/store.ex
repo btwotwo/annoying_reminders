@@ -5,8 +5,8 @@ defmodule RemindersCore.Data.Reminder.Store do
   alias RemindersCore.Data.Reminder
   @type reminder_id :: pos_integer()
 
-  @spec insert!(Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
-  def insert!(%Reminder{} = reminder) do
+  @spec create_reminder(Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
+  def create_reminder(%Reminder{} = reminder) do
     Repo.transaction(fn ->
       reminder_record = Repo.insert!(reminder)
 

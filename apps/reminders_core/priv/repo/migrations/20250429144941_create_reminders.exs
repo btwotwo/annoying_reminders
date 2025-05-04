@@ -9,7 +9,7 @@ defmodule RemindersCore.Data.Reminder.Repo.Migrations.CreateReminders do
     create table(:reminders) do
       add :user_id,
           references(:users, on_delete: :delete_all),
-          null: true
+          null: false
 
       add :text, :string, null: false
       add :firing_time, :time, null: false

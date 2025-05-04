@@ -1,8 +1,8 @@
 defmodule RemindersCore.Data.User do
-  @enforce_keys [:id]
-  defstruct [:id]
+  use Ecto.Schema
 
-  def new(attrs) do
-    struct!(__MODULE__, attrs)
+  schema "users" do
+    has_many(:reminders, RemindersCore.Data.Reminder)
+    timestamps()
   end
 end

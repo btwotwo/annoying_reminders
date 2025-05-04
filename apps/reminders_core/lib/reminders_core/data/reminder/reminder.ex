@@ -13,6 +13,7 @@ defmodule RemindersCore.Data.Reminder do
     field(:ack_delay, :integer)
     timestamps()
     has_one(:state, RemindersCore.Data.Reminder.ReminderState)
+    belongs_to(:user, RemindersCore.Data.User)
   end
 
   @typedoc """
@@ -27,7 +28,7 @@ defmodule RemindersCore.Data.Reminder do
   """
   @type t :: %__MODULE__{
           id: any(),
-          # user_id: any(),
+          user_id: any(),
           text: String.t(),
           firing_time: Time.t(),
           firing_period: :daily | nil,
