@@ -48,4 +48,47 @@ defmodule RemindersCore.Data.Reminder do
     ])
     |> Ecto.Changeset.validate_required([:text, :firing_time, :firing_period])
   end
+
+  @doc ~S"""
+  Calculates target firing `DateTime` based on the Reminder `:firing_time` and `:firing_period`.
+  If the difference between resulting time is less than 10 seconds, the target date will be shifted to the next day.
+  ### Examples
+  iex> now = ~U[2025-05-04 20:00:00Z]
+  ...> reminder = %RemindersCore.Data.Reminder {
+  ...>  firing_time: ~T[21:00:00],
+  ...>  firing_period: :daily
+  ...> }
+  ...> RemindersCore.Data.Reminder.get_target_time(reminder, now)
+  ~U[2025-05-04 21:00:00Z]
+
+  iex> now = ~U[2025-05-04 20:00:00Z]
+  ...> reminder = %RemindersCore.Data.Reminder {
+  ...>   firing_time: ~T[19:00:00],
+  ...>   firing_period: :daily
+  ...> }
+  ...> RemindersCore.Data.Reminder.get_target_time(reminder, now)
+  ~U[2025-05-05 19:00:00Z]
+  """
+  @spec get_target_time(t(), DateTime.t()) :: any()
+  def get_target_time(reminder, now) do
+    # todo: Add handling for firing_periods other than :daily
+    target_datetime =
+      now
+      |> DateTime.to_date()
+      |> DateTime.new!(reminder.firing_time)
+
+    adjust_target_datetime(target_datetime, now)
+  end
+
+  defp adjust_target_datetime(target, now) do
+    diff = DateTime.diff(target, now)
+
+    if diff <= min_timespan_seconds() do
+      target |> DateTime.add(1, :day)
+    else
+      target
+    end
+  end
+
+  defp min_timespan_seconds, do: 10
 end
