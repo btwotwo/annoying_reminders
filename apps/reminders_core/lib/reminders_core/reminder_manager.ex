@@ -6,8 +6,7 @@ defmodule RemindersCore.ReminderManager do
 
   @impl true
   def init(user_id) do
-    states = Store.get_schedulable_states(user_id)
-    
+    reminders = Store.get_schedulable_reminders(user_id) |> Enum.reject(&(&1.last_sent_at == nil)) 
   end
 
   def schedule_reminder(reminder_id, pid) do
