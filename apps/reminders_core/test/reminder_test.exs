@@ -5,9 +5,10 @@ defmodule ReminderTest do
   doctest RemindersCore.Data.Reminder
 
   property "target firing time is in the future in the same time" do
-    check all now <- DateTimeGenerators.datetime(),
-              firing_time <- DateTimeGenerators.time() do
-      
+    check all(
+            now <- DateTimeGenerators.datetime(),
+            firing_time <- DateTimeGenerators.time()
+          ) do
       reminder = %Reminder{
         firing_time: firing_time,
         firing_period: :daily
