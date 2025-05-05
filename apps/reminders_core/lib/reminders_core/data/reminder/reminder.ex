@@ -11,8 +11,9 @@ defmodule RemindersCore.Data.Reminder do
     field(:firing_window, :integer)
     field(:nagging_interval, :integer, default: 10000)
     field(:ack_delay, :integer)
+    field(:state, Ecto.Enum, values: [:pending, :scheduled, :nagging, :acking])
+    field(:last_sent_at, :utc_datetime)
     timestamps()
-    has_one(:state, RemindersCore.Data.Reminder.ReminderState)
     belongs_to(:user, RemindersCore.Data.User)
   end
 
@@ -24,7 +25,9 @@ defmodule RemindersCore.Data.Reminder do
   - `firing_period`: How often the notification should be triggered (e.g `:daily`)
   - `firing_window`: Randomized time windows size. For example, if you set `firing_time` to 12:00 and window size to 15 mins, so it will randomly fire between 11:45 and 12:15.
   - `nagging_interval`: Period indicating how often the notification should be resent. Defined in milliseconds, default value is 10000.
-  - `acknowledge_delay`: Delay before sending an acknowledgment notification. Optional.
+  - `ack_delay`: Delay before sending an acknowledgment notification. Optional.
+  - `state`: Current state of the reminder. Updated *before* the 'send' action is happened.
+  - `last_sent_at`: When the reminder was last sent. Update *after* the 'send' action has happened and succeeded.
   """
   @type t :: %__MODULE__{
           id: any(),
@@ -34,6 +37,8 @@ defmodule RemindersCore.Data.Reminder do
           firing_period: :daily | nil,
           firing_window: pos_integer() | nil,
           nagging_interval: pos_integer(),
+          state: :pending | :scheduled | :nagging | :acking,
+          last_sent_at: DateTime.t(),
           ack_delay: pos_integer() | nil
         }
 
@@ -78,6 +83,10 @@ defmodule RemindersCore.Data.Reminder do
       |> DateTime.new!(reminder.firing_time)
 
     adjust_target_datetime(target_datetime, now)
+  end
+  
+  def schedulable_states() do
+    [:pending, :scheduled, :nagging, :acking]
   end
 
   defp adjust_target_datetime(target, now) do

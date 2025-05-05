@@ -2,6 +2,7 @@ defmodule ReminderTest do
   alias RemindersCore.Data.Reminder
   use ExUnit.Case
   use ExUnitProperties
+  
   doctest RemindersCore.Data.Reminder
 
   property "target firing time is in the future in the same time" do

@@ -1,23 +1,13 @@
 defmodule RemindersCore.Data.Reminder.Store do
+  import Ecto.Query, only: [from: 2]
   alias Ecto.Changeset
-  alias RemindersCore.Data.Reminder.ReminderState
   alias RemindersCore.Data.Repo
   alias RemindersCore.Data.Reminder
   @type reminder_id :: pos_integer()
 
   @spec create_reminder(Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
   def create_reminder(%Reminder{} = reminder) do
-    Repo.transaction(fn ->
-      reminder_record = Repo.insert!(reminder)
-
-      %ReminderState{
-        state: :pending,
-        reminder_id: reminder_record.id
-      }
-      |> Repo.insert!()
-
-      reminder_record
-    end)
+    Repo.insert!(reminder)
   end
 
   @spec update!(RemindersCore.Data.Reminder.t()) :: {:ok, Reminder.t()} | {:error, any()}
@@ -40,8 +30,9 @@ defmodule RemindersCore.Data.Reminder.Store do
     Repo.all(Reminder)
   end
 
-  def get_state!(reminder_id) do
-    Repo.get!(ReminderState, reminder_id)
+  def get_schedulable_states(_user_id) do
+    schedulable_states = Reminder.schedulable_states()
+    from(r in Reminder, where: r.state in ^schedulable_states) |> Repo.all()
   end
 
   def set_scheduled(reminder_id) do
@@ -53,6 +44,6 @@ defmodule RemindersCore.Data.Reminder.Store do
   end
 
   defp set_state(reminder_id, new_state) do
-    get_state!(reminder_id) |> Changeset.change(%{state: new_state}) |> Repo.update!()
+    get!(reminder_id) |> Changeset.change(%{state: new_state}) |> Repo.update!()
   end
 end

@@ -1,7 +1,6 @@
 defmodule RemindersCore.Factory do
   require ExUnitProperties
   alias RemindersCore.Data.Reminder
-  alias RemindersCore.Data.Repo
 
   def reminder_generator(user_id) do
     ExUnitProperties.gen all(
@@ -27,6 +26,7 @@ defmodule RemindersCore.Factory do
         firing_window: firing_window,
         nagging_interval: nagging_interval,
         ack_delay: ack_delay,
+        state: :pending,
         user_id: user_id
       }
     end
