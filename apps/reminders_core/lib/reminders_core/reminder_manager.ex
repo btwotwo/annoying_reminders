@@ -1,12 +1,21 @@
 defmodule RemindersCore.ReminderManager do
+  use GenServer
+  alias RemindersCore.Data.Reminder.Store
+  alias RemindersCore.Data.Reminder.ReminderState
   alias RemindersCore.Data.Reminder.Repo
 
-  def schedule_reminder(id) do
+  @impl true
+  def init(user_id) do
+    states = Store.get_schedulable_states(user_id)
+    
   end
 
-  def confirm_reminder(id) do
+  def schedule_reminder(reminder_id, pid) do
   end
 
-  def acknowledge_reminder(id) do
+  def confirm_reminder(reminder_id, pid) do
+  end
+
+  def acknowledge_reminder(reminder_id, pid) do
   end
 end
