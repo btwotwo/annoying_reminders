@@ -4,10 +4,9 @@ defmodule ReminderTest do
   use ExUnitProperties
   doctest RemindersCore.Data.Reminder
 
-  property "target firing time is today or tomorrow, but always in the future" do
+  property "target firing time is in the future in the same time" do
     check all now <- DateTimeGenerators.datetime(),
-              offset <- StreamData.integer(-86400..86400),
-              firing_time = DateTime.add(now, offset, :second) do
+              firing_time <- DateTimeGenerators.time() do
       
       reminder = %Reminder{
         firing_time: firing_time,
@@ -16,7 +15,7 @@ defmodule ReminderTest do
 
       target_time = Reminder.get_target_time(reminder, now)
       assert DateTime.compare(target_time, now) != :lt
-      assert DateTime.diff(target_time, firing_time, :second) in [0, 86400]
+      assert DateTime.to_time(target_time) == firing_time
     end
   end
 end
