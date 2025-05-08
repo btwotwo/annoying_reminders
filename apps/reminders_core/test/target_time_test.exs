@@ -15,7 +15,7 @@ defmodule ReminderTest do
         firing_period: :daily
       }
 
-      target_time = Reminder.get_target_time(reminder, now)
+      target_time = Reminder.get_schedule_time(reminder, now)
       assert DateTime.compare(target_time, now) != :lt
       assert DateTime.to_time(target_time) == firing_time
     end

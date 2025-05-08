@@ -9,7 +9,7 @@ defmodule RemindersCore.Data.Reminder do
     field(:firing_time, :time)
     field(:firing_period, Ecto.Enum, values: [:daily])
     field(:firing_window, :integer)
-    field(:nagging_interval, :integer, default: 10000)
+    field(:nagging_interval, :integer, default: 10)
     field(:ack_delay, :integer)
     field(:state, Ecto.Enum, values: [:pending, :scheduled, :nagging, :acking])
     field(:last_sent_at, :utc_datetime)
@@ -24,7 +24,7 @@ defmodule RemindersCore.Data.Reminder do
   - `firing_time`: Time of day when reminder should fire.
   - `firing_period`: How often the notification should be triggered (e.g `:daily`)
   - `firing_window`: Randomized time windows size. For example, if you set `firing_time` to 12:00 and window size to 15 mins, so it will randomly fire between 11:45 and 12:15.
-  - `nagging_interval`: Period indicating how often the notification should be resent. Defined in milliseconds, default value is 10000.
+  - `nagging_interval`: Period indicating how often the notification should be resent. Defined in seconds, default value is 10.
   - `ack_delay`: Delay before sending an acknowledgment notification. Optional.
   - `state`: Current state of the reminder. Updated *before* the 'send' action is happened.
   - `last_sent_at`: When the reminder was last sent. Update *after* the 'send' action has happened and succeeded.
@@ -63,7 +63,7 @@ defmodule RemindersCore.Data.Reminder do
   ...>  firing_time: ~T[21:00:00],
   ...>  firing_period: :daily
   ...> }
-  ...> RemindersCore.Data.Reminder.get_target_time(reminder, now)
+  ...> RemindersCore.Data.Reminder.get_schedule_time(reminder, now)
   ~U[2025-05-04 21:00:00Z]
 
   iex> now = ~U[2025-05-04 20:00:00Z]
@@ -71,11 +71,11 @@ defmodule RemindersCore.Data.Reminder do
   ...>   firing_time: ~T[19:00:00],
   ...>   firing_period: :daily
   ...> }
-  ...> RemindersCore.Data.Reminder.get_target_time(reminder, now)
+  ...> RemindersCore.Data.Reminder.get_schedule_time(reminder, now)
   ~U[2025-05-05 19:00:00Z]
   """
-  @spec get_target_time(t(), DateTime.t()) :: any()
-  def get_target_time(reminder, now) do
+  @spec get_schedule_time(t(), DateTime.t()) :: DateTime.t()
+  def get_schedule_time(reminder, now) do
     # todo: Add handling for firing_periods other than :daily
     target_datetime =
       now
@@ -84,10 +84,19 @@ defmodule RemindersCore.Data.Reminder do
 
     adjust_target_datetime(target_datetime, now)
   end
-  
-  def schedulable_states() do
-    [:pending, :scheduled, :nagging, :acking]
+
+  @spec get_nag_time(t(), DateTime.t()) :: DateTime.t()
+  def get_nag_time(reminder, now) do
+    DateTime.add(now, reminder.nagging_interval)
   end
+
+  @spec get_ack_time(t(), DateTime.t()) :: DateTime.t()
+  def get_ack_time(reminder, now) when is_number(reminder.ack_delay) do
+    DateTime.add(now, reminder.ack_delay)
+  end
+
+  @spec schedulable_states() :: [:acking | :nagging | :pending | :scheduled, ...]
+  def schedulable_states(), do: [:pending, :scheduled, :nagging, :acking]
 
   defp adjust_target_datetime(target, now) do
     diff = DateTime.diff(target, now)
