@@ -25,13 +25,10 @@ defmodule RemindersCore.Data.Reminder.Store do
     Repo.delete!(reminder)
   end
 
-  
-  @spec get_schedulable_reminders(any()) :: [Reminder.t()]
-  def get_schedulable_reminders(_user_id) do
-    schedulable_states = Reminder.schedulable_states()
-    from(r in Reminder, where: r.state in ^schedulable_states) |> Repo.all()
+  def get(user_id, states) do
+    from(r in Reminder, where: r.state in ^states and r.user_id == ^user_id) |> Repo.all()
   end
-
+  
   def set_scheduled(reminder_id) do
     set_state(reminder_id, :scheduled)
   end

@@ -95,17 +95,10 @@ defmodule RemindersCore.Data.Reminder do
     DateTime.add(now, reminder.ack_delay)
   end
 
-  def target_time(%__MODULE__{state: :scheduled} = reminder, now),
-    do: get_schedule_time(reminder, now)
-  def target_time(%__MODULE__{state: :nagging} = reminder, now), do: get_nag_time(reminder, now)
-  def target_time(%__MODULE__{state: :acking} = reminder, now), do: get_ack_time(reminder, now)
-
-  @spec schedulable_states() :: [:acking | :nagging | :scheduled, ...]
-  def schedulable_states(), do: [:scheduled, :nagging, :acking]
 
   defp adjust_target_datetime(target, now) do
     diff = DateTime.diff(target, now)
-
+    # 
     if diff <= min_timespan_seconds() do
       target |> DateTime.add(1, :day)
     else
